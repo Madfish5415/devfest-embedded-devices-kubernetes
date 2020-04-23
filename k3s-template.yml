@@ -1,0 +1,121 @@
+# couchdb-cloud
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{COUCHDB_CLOUD_NAME}}
+  name: {{COUCHDB_CLOUD_NAME}}
+spec:
+  type: NodePort
+  ports:
+    - port: 5984
+      targetPort: 5984
+      nodePort: {{COUCHDB_CLOUD_PORT}}
+  selector:
+    app: {{COUCHDB_CLOUD_NAME}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{COUCHDB_CLOUD_NAME}}
+  labels:
+    app: {{COUCHDB_CLOUD_NAME}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{COUCHDB_CLOUD_NAME}}
+  template:
+    metadata:
+      labels:
+        app: {{COUCHDB_CLOUD_NAME}}
+    spec:
+      containers:
+        - name: {{COUCHDB_CLOUD_NAME}}
+          image: {{COUCHDB_CLOUD_IMAGE}}
+          env:
+            - name: NODE_NETBIOS_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODENAME
+              value: $(NODE_NETBIOS_NAME).couchdb-cloud
+          ports:
+            - name: {{COUCHDB_CLOUD_NAME}}
+              containerPort: 5984
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb-cloud-volume-data
+            - mountPath: /opt/couchdb/etc/local.d
+              name: couchdb-cloud-volume-config
+      volumes:
+        - name: couchdb-cloud-volume-data
+          hostPath:
+            path: {{COUCHDB_CLOUD_VOLUME_DATA}}
+            type: DirectoryOrCreate
+        - name: couchdb-cloud-volume-config
+          hostPath:
+            path: {{COUCHDB_CLOUD_VOLUME_CONFIG}}
+            type: DirectoryOrCreate
+
+# couchdb-device
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{COUCHDB_DEVICE_NAME}}
+  name: {{COUCHDB_DEVICE_NAME}}
+spec:
+  type: NodePort
+  ports:
+    - port: 5984
+      targetPort: 5984
+      nodePort: {{COUCHDB_DEVICE_PORT}}
+  selector:
+    app: {{COUCHDB_DEVICE_NAME}}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{COUCHDB_DEVICE_NAME}}
+  labels:
+    app: {{COUCHDB_DEVICE_NAME}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{COUCHDB_DEVICE_NAME}}
+  template:
+    metadata:
+      labels:
+        app: {{COUCHDB_DEVICE_NAME}}
+    spec:
+      containers:
+        - name: {{COUCHDB_DEVICE_NAME}}
+          image: {{COUCHDB_CLOUD_IMAGE}}
+          env:
+            - name: NODE_NETBIOS_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODENAME
+              value: $(NODE_NETBIOS_NAME).couchdb-device
+          ports:
+            - name: {{COUCHDB_DEVICE_NAME}}
+              containerPort: 5984
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb-device-volume-data
+            - mountPath: /opt/couchdb/etc/local.d
+              name: couchdb-device-volume-config
+      volumes:
+        - name: couchdb-device-volume-data
+          hostPath:
+            path: {{COUCHDB_DEVICE_VOLUME_DATA}}
+            type: DirectoryOrCreate
+        - name: couchdb-device-volume-config
+          hostPath:
+            path: {{COUCHDB_DEVICE_VOLUME_CONFIG}}
+            type: DirectoryOrCreate
