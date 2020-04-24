@@ -1,0 +1,43 @@
+# couchdb-cloud-deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb-cloud-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: replace-by-kustomize
+  template:
+    metadata:
+      labels:
+        app: replace-by-kustomize
+    spec:
+      containers:
+        - name: couchdb-cloud-container
+          image: couchdb
+          env:
+            - name: NODE_NETBIOS_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODENAME
+              value: $(NODE_NETBIOS_NAME).couchdb-cloud
+          ports:
+            - name: couchdb-cloud
+              containerPort: 5984
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb-cloud-volume-data
+            - mountPath: /opt/couchdb/etc/local.d
+              name: couchdb-cloud-volume-config
+      volumes:
+        - name: couchdb-cloud-volume-data
+          hostPath:
+            path: /home/couchdb/data/cloud/
+            type: DirectoryOrCreate
+        - name: couchdb-cloud-volume-config
+          hostPath:
+            path: /home/couchdb/config/cloud/
+            type: DirectoryOrCreate

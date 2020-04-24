@@ -1,0 +1,45 @@
+# couchdb-device-deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: couchdb-device-deployment
+  labels:
+    app: replace-by-kustomize
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: replace-by-kustomize
+  template:
+    metadata:
+      labels:
+        app: replace-by-kustomize
+    spec:
+      containers:
+        - name: couchdb-device-container
+          image: couchdb
+          env:
+            - name: NODE_NETBIOS_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: NODENAME
+              value: $(NODE_NETBIOS_NAME).couchdb-device
+          ports:
+            - name: couchdb-device
+              containerPort: 5984
+          volumeMounts:
+            - mountPath: /opt/couchdb/data
+              name: couchdb-device-volume-data
+            - mountPath: /opt/couchdb/etc/local.d
+              name: couchdb-device-volume-config
+      volumes:
+        - name: couchdb-device-volume-data
+          hostPath:
+            path: /home/couchdb/data/device/
+            type: DirectoryOrCreate
+        - name: couchdb-device-volume-config
+          hostPath:
+            path: /home/couchdb/config/device/
+            type: DirectoryOrCreate

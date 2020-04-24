@@ -1,0 +1,16 @@
+# couchdb-device-service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: replace-by-kustomize
+  name: couchdb-device-service
+spec:
+  type: NodePort
+  ports:
+    - port: 5984
+      targetPort: 5984
+      nodePort: 31555
+  selector:
+    app: replace-by-kustomize

@@ -1,0 +1,17 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: devfest-embedded-device
+
+commonLabels:
+  app: couchdb-cloud
+
+resources:
+  - ./couchdb-cloud-deployment.yml
+  - ./couchdb-cloud-service.yml
+
+images:
+  - name: couchdb
+  - newName: couchdb
+  - newTag: latest
